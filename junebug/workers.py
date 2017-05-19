@@ -281,9 +281,14 @@ def post_eb(reason, url):
 
 
 def post(url, data, timeout):
-    urlparts = urlparse(url)
-    if urlparts.username and urlparts.password:
-        auth = (urlparts.username, urlparts.password)
+    parts = urlparse(url)
+    if parts.username and parts.password:
+        auth = (parts.username, parts.password)
+        # netloc still includes the auth, strip it out
+        url = "%s://%s%s" % (
+            parts.scheme, parts.netloc[parts.netloc.find("@")+1:], parts.path)
+        if parts.query is not "":
+            url = "%s?%s" % (url, parts.query)
     else:
         auth = None
     d = treq.post(
