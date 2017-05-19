@@ -1,5 +1,6 @@
 import json
 import logging
+from urlparse import urlparse
 
 import treq
 
@@ -280,10 +281,15 @@ def post_eb(reason, url):
 
 
 def post(url, data, timeout):
+    urlparts = urlparse(url)
+    if urlparts.username and urlparts.password:
+        auth = (urlparts.username, urlparts.password)
+    else:
+        auth = None
     d = treq.post(
         url.encode('utf-8'),
         data=json.dumps(data, cls=JSONMessageEncoder),
         headers={'Content-Type': 'application/json'},
-        timeout=timeout)
+        timeout=timeout, auth=auth)
     d.addErrback(post_eb, url)
     return d
